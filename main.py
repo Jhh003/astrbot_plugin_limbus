@@ -93,11 +93,15 @@ class LimbusGachaPlugin(Star):
         images = []
         for path in image_paths:
             if path and os.path.exists(path):
-                img = PILImage.open(path)
-                # 转换为RGBA模式以支持透明背景
-                if img.mode != 'RGBA':
-                    img = img.convert('RGBA')
-                images.append(img)
+                try:
+                    img = PILImage.open(path)
+                    # 转换为RGBA模式以支持透明背景
+                    if img.mode != 'RGBA':
+                        img = img.convert('RGBA')
+                    images.append(img)
+                except (IOError, OSError) as e:
+                    logger.warning(f"无法加载图片 {path}: {e}")
+                    continue
         
         if not images:
             return None
@@ -273,8 +277,8 @@ class LimbusGachaPlugin(Star):
             # 清理临时文件
             try:
                 os.unlink(composite_path)
-            except (IOError, OSError):
-                pass
+            except (IOError, OSError) as e:
+                logger.warning(f"清理临时文件失败 {composite_path}: {e}")
         else:
             # 如果没有图片或合成失败，只发送文字
             yield event.plain_result(result_text + "\n(图片资源未配置)")
