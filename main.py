@@ -79,15 +79,19 @@ class LimbusGachaPlugin(Star):
             抽取到的人格信息字典
         """
         # 根据概率确定稀有度
+        # SSS: 0-3, SS: 3-15, S: 15-100
         rand = random.uniform(0, 100)
-        cumulative = 0
         
-        selected_rarity = RARITY_S  # 默认为最低稀有度
-        for rarity, rate in RARITY_RATES.items():
-            cumulative += rate
-            if rand <= cumulative:
-                selected_rarity = rarity
-                break
+        # 按照从稀有到常见的顺序检查
+        if rand < RARITY_RATES[RARITY_SSS]:
+            # 0 <= rand < 3 -> SSS (3%)
+            selected_rarity = RARITY_SSS
+        elif rand < RARITY_RATES[RARITY_SSS] + RARITY_RATES[RARITY_SS]:
+            # 3 <= rand < 15 -> SS (12%)
+            selected_rarity = RARITY_SS
+        else:
+            # 15 <= rand < 100 -> S (85%)
+            selected_rarity = RARITY_S
         
         # 从对应稀有度的人格池中随机选择
         pool = get_identities_by_rarity(selected_rarity)
