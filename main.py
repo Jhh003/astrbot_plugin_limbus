@@ -7,8 +7,8 @@
 - 十连：模拟十连抽取
 
 使用指令：
-- /limbus单抽 或 /limbus抽卡 - 进行单次抽取
-- /limbus十连 - 进行十连抽取
+- /tq单抽 或 /tq抽卡 - 进行单次抽取
+- /tq十连 - 进行十连抽取
 """
 import os
 import random
@@ -126,7 +126,7 @@ class LimbusGachaPlugin(Star):
         rarity_display = get_rarity_display(identity["rarity"])
         return f"【{identity['sinner']}】{identity['name']}\n稀有度: {rarity_display}"
     
-    @filter.command("limbus单抽")
+    @filter.command("tq单抽")
     async def gacha_single(self, event: AstrMessageEvent):
         """边狱巴士单抽 - 模拟单次人格抽取"""
         result = self._draw_single()
@@ -147,13 +147,13 @@ class LimbusGachaPlugin(Star):
             # 如果图片不存在，只发送文字
             yield event.plain_result(result_text + "\n\n(图片资源未配置)")
     
-    @filter.command("limbus抽卡")
+    @filter.command("tq抽卡")
     async def gacha_single_alias(self, event: AstrMessageEvent):
         """边狱巴士抽卡 - 单抽的别名指令"""
         async for result in self.gacha_single(event):
             yield result
     
-    @filter.command("limbus十连")
+    @filter.command("tq十连")
     async def gacha_ten(self, event: AstrMessageEvent):
         """边狱巴士十连 - 模拟十连抽取"""
         results = self._draw_multiple(10)
