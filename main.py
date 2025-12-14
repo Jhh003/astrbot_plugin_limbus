@@ -22,6 +22,7 @@ from astrbot.api import logger
 from .identities import (
     IDENTITIES,
     RARITY_RATES,
+    PITY_RATES,
     RARITY_SSS,
     RARITY_SS,
     RARITY_S,
@@ -71,27 +72,33 @@ class LimbusGachaPlugin(Star):
         
         return None
     
-    def _draw_single(self) -> dict:
+    def _draw_single(self, is_pity: bool = False) -> dict:
         """
         执行单次抽取
         
+        Args:
+            is_pity: 是否为十连保底（第10次）
+            
         Returns:
             抽取到的人格信息字典
         """
-        # 根据概率确定稀有度
-        # SSS: 0-3, SS: 3-15, S: 15-100
         rand = random.uniform(0, 100)
         
-        # 按照从稀有到常见的顺序检查
-        if rand < RARITY_RATES[RARITY_SSS]:
-            # 0 <= rand < 3 -> SSS (3%)
-            selected_rarity = RARITY_SSS
-        elif rand < RARITY_RATES[RARITY_SSS] + RARITY_RATES[RARITY_SS]:
-            # 3 <= rand < 15 -> SS (12%)
-            selected_rarity = RARITY_SS
+        if is_pity:
+            # 十连保底：第10次必出00或00以上
+            # 000: 2.9%, 00: 94.5%, 总计 97.4%（实际为100%，没有0）
+            if rand < PITY_RATES[RARITY_SSS]:
+                selected_rarity = RARITY_SSS
+            else:
+                selected_rarity = RARITY_SS
         else:
-            # 15 <= rand < 100 -> S (85%)
-            selected_rarity = RARITY_S
+            # 普通抽取：000: 2.9%, 00: 12.8%, 0: 81.7%
+            if rand < RARITY_RATES[RARITY_SSS]:
+                selected_rarity = RARITY_SSS
+            elif rand < RARITY_RATES[RARITY_SSS] + RARITY_RATES[RARITY_SS]:
+                selected_rarity = RARITY_SS
+            else:
+                selected_rarity = RARITY_S
         
         # 从对应稀有度的人格池中随机选择
         pool = get_identities_by_rarity(selected_rarity)
@@ -103,7 +110,7 @@ class LimbusGachaPlugin(Star):
     
     def _draw_multiple(self, count: int) -> list:
         """
-        执行多次抽取
+        执行多次抽取（十连带保底）
         
         Args:
             count: 抽取次数
@@ -111,7 +118,12 @@ class LimbusGachaPlugin(Star):
         Returns:
             抽取到的人格信息列表
         """
-        return [self._draw_single() for _ in range(count)]
+        results = []
+        for i in range(count):
+            # 第10次为保底
+            is_pity = (i == 9)
+            results.append(self._draw_single(is_pity=is_pity))
+        return results
     
     def _format_result(self, identity: dict) -> str:
         """
@@ -173,7 +185,7 @@ class LimbusGachaPlugin(Star):
         
         result_text = "\n".join(result_lines)
         
-        # 收集存在的图片
+        # 收集存在的图片并构建消息链（横向排列）
         images = []
         for result in results:
             image_path = self._get_image_path(result["image"])
@@ -181,8 +193,9 @@ class LimbusGachaPlugin(Star):
                 images.append(Image.fromFileSystem(image_path))
         
         if images:
-            # 如果有图片，发送文字和所有图片
-            chain = [Plain(result_text)] + images
+            # 先发送统计文字，然后横向排列所有图片
+            chain = [Plain(result_text)]
+            chain.extend(images)  # 将所有图片添加到同一消息链中实现横向排列
             yield event.chain_result(chain)
         else:
             # 如果没有图片，只发送文字
