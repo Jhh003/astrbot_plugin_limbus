@@ -193,10 +193,11 @@ class LimbusGachaPlugin(Star):
                 images.append(Image.fromFileSystem(image_path))
         
         if images:
-            # 先发送统计文字，然后横向排列所有图片
-            chain = [Plain(result_text)]
-            chain.extend(images)  # 将所有图片添加到同一消息链中实现横向排列
-            yield event.chain_result(chain)
+            # 构建消息链：统计文字 + 所有图片横向排列
+            # 方式1：先文字后图片
+            message_chain = [Plain(result_text)]
+            message_chain.extend(images)
+            yield event.chain_result(message_chain)
         else:
             # 如果没有图片，只发送文字
             yield event.plain_result(result_text + "\n(图片资源未配置)")
