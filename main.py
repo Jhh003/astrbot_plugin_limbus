@@ -12,7 +12,10 @@
 """
 import os
 import random
+import tempfile
 from pathlib import Path
+
+from PIL import Image as PILImage
 
 from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.star import Context, Star, register
@@ -71,6 +74,72 @@ class LimbusGachaPlugin(Star):
             return str(default_path)
         
         return None
+    
+    def _create_horizontal_composite(self, image_paths: list, spacing: int = 5) -> str | None:
+        """
+        将多张图片横向排列合成一张图片
+        
+        Args:
+            image_paths: 图片路径列表
+            spacing: 图片之间的间距（像素）
+            
+        Returns:
+            合成图片的临时文件路径，如果失败则返回 None
+        """
+        if not image_paths:
+            return None
+        
+        # 加载所有图片
+        images = []
+        for path in image_paths:
+            if path and os.path.exists(path):
+                img = PILImage.open(path)
+                # 转换为RGBA模式以支持透明背景
+                if img.mode != 'RGBA':
+                    img = img.convert('RGBA')
+                images.append(img)
+        
+        if not images:
+            return None
+        
+        # 计算合成图片的尺寸
+        # 统一高度为所有图片中的最大高度
+        max_height = max(img.height for img in images)
+        
+        # 将所有图片调整为相同高度（保持宽高比）
+        resized_images = []
+        for img in images:
+            if img.height != max_height:
+                ratio = max_height / img.height
+                new_width = int(img.width * ratio)
+                img = img.resize((new_width, max_height), PILImage.Resampling.LANCZOS)
+            resized_images.append(img)
+        
+        # 计算总宽度
+        total_width = sum(img.width for img in resized_images) + spacing * (len(resized_images) - 1)
+        
+        # 创建白色背景的合成图片
+        composite = PILImage.new('RGB', (total_width, max_height), (255, 255, 255))
+        
+        # 依次粘贴图片
+        x_offset = 0
+        for img in resized_images:
+            # 将RGBA图片粘贴到RGB背景上
+            if img.mode == 'RGBA':
+                # 创建白色背景
+                bg = PILImage.new('RGB', img.size, (255, 255, 255))
+                bg.paste(img, mask=img.split()[3])  # 使用alpha通道作为mask
+                composite.paste(bg, (x_offset, 0))
+            else:
+                composite.paste(img, (x_offset, 0))
+            x_offset += img.width + spacing
+        
+        # 保存为临时文件
+        temp_file = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
+        composite.save(temp_file.name, 'PNG')
+        temp_file.close()
+        
+        return temp_file.name
     
     def _draw_single(self, is_pity: bool = False) -> dict:
         """
@@ -185,21 +254,29 @@ class LimbusGachaPlugin(Star):
         
         result_text = "\n".join(result_lines)
         
-        # 收集存在的图片并构建消息链（横向排列）
-        images = []
+        # 收集存在的图片路径
+        image_paths = []
         for result in results:
             image_path = self._get_image_path(result["image"])
             if image_path:
-                images.append(Image.fromFileSystem(image_path))
+                image_paths.append(image_path)
         
-        if images:
-            # 构建消息链：统计文字 + 所有图片横向排列
-            # 方式1：先文字后图片
-            message_chain = [Plain(result_text)]
-            message_chain.extend(images)
-            yield event.chain_result(message_chain)
+        # 创建横向排列的合成图片
+        composite_path = self._create_horizontal_composite(image_paths)
+        
+        if composite_path:
+            # 发送文字 + 横向排列的合成图片
+            yield event.chain_result([
+                Plain(result_text),
+                Image.fromFileSystem(composite_path)
+            ])
+            # 清理临时文件
+            try:
+                os.unlink(composite_path)
+            except (IOError, OSError):
+                pass
         else:
-            # 如果没有图片，只发送文字
+            # 如果没有图片或合成失败，只发送文字
             yield event.plain_result(result_text + "\n(图片资源未配置)")
     
     async def terminate(self):
