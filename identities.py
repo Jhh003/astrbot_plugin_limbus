@@ -114,7 +114,7 @@ IDENTITIES = [
     {"name": "20区圣愚", "sinner": "良秀", "rarity": RARITY_SS, "image": "Ryoshu/Ryoshu-sheng_yv.webp"},
 
     # === 默尔索 (Meursault) ===
-    {"name": "W公司2级清扫人员", "sinner": "默尔索", "rarity": RARITY_SS, "image": "Meursault/Meursault-W.webp"},
+    {"name": "W公司2级清扫人员", "sinner": "默尔索", "rarity": RARITY_SSS, "image": "Meursault/Meursault-W.webp"},
     {"name": "R公司第四集团军犀牛队", "sinner": "默尔索", "rarity": RARITY_SSS, "image": "Meursault/Meursault-R.webp"},
     {"name": "N公司大锤", "sinner": "默尔索", "rarity": RARITY_SSS, "image": "Meursault/Meursault-N.webp"},
     {"name": "LCB罪人", "sinner": "默尔索", "rarity": RARITY_S, "image": "Meursault/Meursault-LCB.jpg"},
