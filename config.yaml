@@ -155,7 +155,7 @@ luck_index:
       window: 10
       rating: "大欧皇"
       message: "这运气简直逆天，买彩票去吧！"
-    - threshold: 2   # 近20抽出4个000
+    - threshold: 2   # 近20抽出2个000
       window: 20
       rating: "欧皇"
       message: "运气不错，继续保持！"

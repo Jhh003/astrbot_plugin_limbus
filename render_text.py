@@ -6,13 +6,8 @@
 """
 from typing import Optional
 
+from .identities import get_rarity_display
 
-# 稀有度显示映射
-RARITY_DISPLAY = {
-    "SSS": "★★★",
-    "SS": "★★",
-    "S": "★",
-}
 
 # 稀有度排序权重（用于排序显示）
 RARITY_WEIGHT = {
@@ -20,19 +15,6 @@ RARITY_WEIGHT = {
     "SS": 2,
     "S": 1,
 }
-
-
-def get_rarity_display(rarity: str) -> str:
-    """
-    获取稀有度的显示文本
-    
-    Args:
-        rarity: 稀有度代码 (SSS, SS, S)
-        
-    Returns:
-        星星显示文本
-    """
-    return RARITY_DISPLAY.get(rarity, rarity)
 
 
 def format_single_result(identity: dict, show_rarity: bool = True) -> str:
