@@ -1,0 +1,180 @@
+# -*- coding: utf-8 -*-
+# 边狱巴士人格抽取插件配置文件
+# 修改后可热重载（重启插件生效）
+
+# ===================
+# 稀有度概率配置 (%)
+# ===================
+rarity_rates:
+  SSS: 2.9     # 000 人格概率
+  SS: 12.8    # 00 人格概率
+  S: 81.7     # 0 人格概率
+
+# ===================
+# 十连保底配置
+# ===================
+pity:
+  enabled: true           # 是否开启十连保底
+  guarantee_rarity: "SS"  # 保底最低稀有度 (SS = 00, SSS = 000)
+  pity_rates:             # 保底时的概率分布 (仅当保底触发时使用)
+    SSS: 2.98             # 保底时000概率
+    SS: 97.02             # 保底时00概率
+
+# ===================
+# 卡池配置
+# ===================
+pools:
+  # 常驻池 - 包含所有人格
+  常驻池:
+    enabled: true
+    description: "包含所有可抽取人格"
+    filter: null  # null 表示不过滤，包含所有人格
+  
+  # 示例：罪人专属池
+  李箱专属池:
+    enabled: true
+    description: "只包含李箱的人格"
+    filter:
+      type: "sinner"
+      value: "李箱"
+  
+  浮士德专属池:
+    enabled: true
+    description: "只包含浮士德的人格"
+    filter:
+      type: "sinner"
+      value: "浮士德"
+
+  堂吉诃德专属池:
+    enabled: true
+    description: "只包含堂吉诃德的人格"
+    filter:
+      type: "sinner"
+      value: "堂吉诃德"
+
+  良秀专属池:
+    enabled: true
+    description: "只包含良秀的人格"
+    filter:
+      type: "sinner"
+      value: "良秀"
+
+  默尔索专属池:
+    enabled: true
+    description: "只包含默尔索的人格"
+    filter:
+      type: "sinner"
+      value: "默尔索"
+
+  鸿璐专属池:
+    enabled: true
+    description: "只包含鸿璐的人格"
+    filter:
+      type: "sinner"
+      value: "鸿璐"
+
+  希斯克利夫专属池:
+    enabled: true
+    description: "只包含希斯克利夫的人格"
+    filter:
+      type: "sinner"
+      value: "希斯克利夫"
+
+  以实玛利专属池:
+    enabled: true
+    description: "只包含以实玛利的人格"
+    filter:
+      type: "sinner"
+      value: "以实玛利"
+
+  罗佳专属池:
+    enabled: true
+    description: "只包含罗佳的人格"
+    filter:
+      type: "sinner"
+      value: "罗佳"
+
+  辛克莱专属池:
+    enabled: true
+    description: "只包含辛克莱的人格"
+    filter:
+      type: "sinner"
+      value: "辛克莱"
+
+  格里高尔专属池:
+    enabled: true
+    description: "只包含格里高尔的人格"
+    filter:
+      type: "sinner"
+      value: "格里高尔"
+
+  奥提斯专属池:
+    enabled: true
+    description: "只包含奥提斯的人格"
+    filter:
+      type: "sinner"
+      value: "奥提斯"
+
+# 默认使用的卡池
+default_pool: "常驻池"
+
+# ===================
+# 指令前缀配置
+# ===================
+command_prefix: "tq"  # 指令前缀，如 /tq单抽、/tq十连
+
+# ===================
+# 非酋/欧皇指数配置
+# ===================
+luck_index:
+  # 非酋指数评价标准（最近X抽没出000）
+  unlucky_thresholds:
+    - threshold: 200
+      rating: "超级非酋"
+      message: "连抽200发都没见到000？你是不是得罪了月计？"
+    - threshold: 150
+      rating: "大非酋"
+      message: "150抽无000，建议去拜拜裁判鸟"
+    - threshold: 100
+      rating: "非酋"
+      message: "100抽无000，正常发挥，继续努力"
+    - threshold: 50
+      rating: "小非酋"
+      message: "50抽无000，才刚开始，不用慌"
+    - threshold: 0
+      rating: "普通"
+      message: "运气尚可，继续加油"
+  
+  # 欧皇指数评价标准（最近X抽出了N个000）
+  lucky_thresholds:
+    - threshold: 5   # 近10抽出5个000
+      window: 10
+      rating: "超级欧皇"
+      message: "天选之人！请收下我的膝盖！"
+    - threshold: 3   # 近10抽出3个000
+      window: 10
+      rating: "大欧皇"
+      message: "这运气简直逆天，买彩票去吧！"
+    - threshold: 2   # 近20抽出2个000
+      window: 20
+      rating: "欧皇"
+      message: "运气不错，继续保持！"
+    - threshold: 1   # 近10抽出1个000
+      window: 10
+      rating: "小欧"
+      message: "刚出了000？恭喜恭喜～"
+    - threshold: 0
+      window: 10
+      rating: "普通"
+      message: "运气普通，继续抽吧"
+
+# ===================
+# 图片显示配置
+# ===================
+image:
+  # 十连图片布局
+  ten_pull_layout:
+    rows: 2           # 行数
+    cols: 5           # 每行列数
+    spacing: 5        # 图片间距（像素）
+    target_height: 120  # 目标图片高度（像素）
